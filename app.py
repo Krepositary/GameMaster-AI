@@ -1,113 +1,75 @@
 import streamlit as st
 from google import genai
 import os
-import json
-import requests
 
-# ------------------- CONFIG -------------------
+# ---------------- CONFIG ----------------
 st.set_page_config(
-    page_title="GameMaster AI",
-    page_icon="🎮",
+    page_title="GameMaster AI 🎮",
     layout="wide"
 )
 
-# ------------------- GEMINI CLIENT -------------------
-from google import genai
-import os
-
-client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
-
-model = client.models.get("models/gemini-1.5-pro-latest")
-
-response = model.generate_content(
-    "Create a fantasy game concept with NPC behaviors."
+# ---------------- API CLIENT ----------------
+client = genai.Client(
+    api_key=os.environ["GEMINI_API_KEY"]
 )
 
-print(response.text)
+MODEL_ID = "models/gemini-1.5-pro-latest"
 
-
-# ------------------- LOTTIE LOADER -------------------
-def load_lottie(url):
-    r = requests.get(url)
-    if r.status_code != 200:
-        return None
-    return r.json()
-
-# ------------------- UI -------------------
-st.markdown("""
-<style>
-.big-title { font-size:40px; font-weight:800; }
-.card { background:#111; padding:20px; border-radius:15px; margin-bottom:15px; }
-</style>
-""", unsafe_allow_html=True)
-
-st.markdown('<div class="big-title">🎮 GameMaster AI</div>', unsafe_allow_html=True)
-st.caption("Your AI-powered Game Design & Strategy Partner")
-
-# ------------------- ANIMATION -------------------
-lottie_game = load_lottie("https://assets10.lottiefiles.com/packages/lf20_qp1q7mct.json")
-
-col1, col2 = st.columns([1,2])
-
-with col1:
-    st.image(
-        "https://cdn-icons-png.flaticon.com/512/4712/4712109.png",
-        width=220,
-        caption="GameMaster Avatar"
+# ---------------- HELPER ----------------
+def generate(prompt):
+    response = client.generate_content(
+        model=MODEL_ID,
+        contents=prompt
     )
+    return response.text
 
-with col2:
-    if lottie_game:
-        from streamlit_lottie import st_lottie
-        st_lottie(lottie_game, height=260)
+# ---------------- UI ----------------
+st.title("🎮 GameMaster AI – Ultimate Game Studio Agent")
 
-# ------------------- FEATURES -------------------
-feature = st.selectbox(
-    "Select GameMaster Skill",
-    [
-        "🎮 Game Concept Generator",
-        "🗺 Level & Environment Designer",
-        "🤖 NPC Behavior Designer",
-        "📊 Game Strategy Assistant",
-        "💬 Dialogue & Story Scripting"
-    ]
-)
+tabs = st.tabs([
+    "🧠 Game Concept",
+    "🌍 Level Design",
+    "🤖 NPC Behavior",
+    "⚔️ Strategy",
+    "📜 Story & Dialogue"
+])
 
-idea = st.text_area(
-    "Describe your game idea / requirement",
-    height=120,
-    placeholder="Example: Open-world RPG with mythological elements..."
-)
-
-# ------------------- PROMPT ENGINE -------------------
-def build_prompt(feature, idea):
-    return f"""
-You are GameMaster AI, a professional game development assistant.
-
-Feature: {feature}
-
-User Input:
-{idea}
-
-Generate structured, creative, and practical output.
-Use bullet points, sections, and clear explanations.
-"""
-
-# ------------------- RUN -------------------
-if st.button("🚀 Generate", use_container_width=True):
-    if not idea.strip():
-        st.warning("Please enter an idea")
-    else:
-        with st.spinner("GameMaster AI is thinking..."):
-            output = generate(build_prompt(feature, idea))
-
-        st.markdown("### 🧠 AI Output")
-        st.markdown(f"<div class='card'>{output}</div>", unsafe_allow_html=True)
-
-        # ------------------- DOWNLOAD -------------------
-        st.download_button(
-            label="📥 Download Result",
-            data=output,
-            file_name="gamemaster_ai_output.txt",
-            mime="text/plain"
+with tabs[0]:
+    idea = st.text_area(
+        "Describe your game idea",
+        placeholder="A cyberpunk RPG set in Mumbai with AI gangs..."
+    )
+    if st.button("Generate Game Concept"):
+        out = generate(
+            f"Create a detailed game concept with genre, storyline, and core mechanics:\n{idea}"
         )
+        st.markdown(out)
+
+with tabs[1]:
+    if st.button("Generate Level Design"):
+        out = generate(
+            "Design 3 game levels with environment, terrain, and challenges."
+        )
+        st.markdown(out)
+
+with tabs[2]:
+    if st.button("Generate NPC Behaviors"):
+        out = generate(
+            "Create intelligent NPC behavior rules for enemies, allies, and civilians."
+        )
+        st.markdown(out)
+
+with tabs[3]:
+    if st.button("Generate Game Strategy"):
+        out = generate(
+            "Suggest player engagement and balancing strategies for a modern game."
+        )
+        st.markdown(out)
+
+with tabs[4]:
+    if st.button("Generate Story & Dialogues"):
+        out = generate(
+            "Write interactive quests and branching dialogues for a game."
+        )
+        st.markdown(out)
+
