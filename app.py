@@ -12,14 +12,15 @@ st.set_page_config(
 )
 
 # ------------------- GEMINI CLIENT -------------------
-client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+from google import genai
 
-def generate(prompt):
-    response = client.models.generate_content(
-        model="gemini-1.5-pro",
-        contents=prompt
-    )
-    return response.text
+# The client gets the API key from the environment variable `GEMINI_API_KEY`.
+client = genai.Client()
+
+response = client.models.generate_content(
+    model="gemini-2.5-flash", contents="Explain how AI works in a few words"
+)
+print(response.text)
 
 # ------------------- LOTTIE LOADER -------------------
 def load_lottie(url):
