@@ -17,12 +17,13 @@ import os
 
 client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
-def generate(prompt):
-    response = client.models.generate_content(
-        model="gemini-1.5-pro-latest",
-        contents=prompt
-    )
-    return response.text
+model = client.models.get("models/gemini-1.5-pro-latest")
+
+response = model.generate_content(
+    "Create a fantasy game concept with NPC behaviors."
+)
+
+print(response.text)
 
 
 # ------------------- LOTTIE LOADER -------------------
